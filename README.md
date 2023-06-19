@@ -90,4 +90,38 @@ Our created artifact can be found on our local terminal too at this path
 `/var/lib/jenkins/jobs/tooling_github/builds/<build_number>/archive/`
 ![artifact_terminal](./Img/18.artifact_terminal.jpg)
 
+## Configuring Jenkins To Copy Files(Artifact) to NFS Server
 
+To achieve this, we install the `Publish Via SSH` pluging on Jenkins.
+The plugin allows one to send newly created packages to a remote server and install them, start and stop services that the build may depend on and many other use cases.
+
+On main dashboard select "Manage Jenkins" and choose "Manage Plugins" menu item.
+
+On "Available" tab search for "Publish Over SSH" plugin and install it
+![plugin](./Img/19.plugin.jpg)
+
+Configure the job to copy artifacts over to NFS server.
+On main dashboard select "Manage Jenkins" and choose "Configure System" menu item.
+
+Scroll down to Publish over SSH plugin configuration section and configure it to be able to connect to the NFS server:
+
+Provide a private key (content of .pem file that you use to connect to NFS server via SSH/Putty)
+
+Hostname – can be private IP address of NFS server <br/>
+Username – ec2-user (since NFS server is based on EC2 with RHEL 8) <br/>
+Remote directory – /mnt/apps since our Web Servers use it as a mointing point to retrieve files from the NFS server
+
+Test the configuration and make sure the connection returns Success. Remember, that TCP port 22 on NFS server must be open to receive SSH connections.
+
+![setting_publish](./Img/20.setting_pos.jpg)
+![server_add](./Img/21.server_add.jpg)
+
+We specify `**` on the `send build artifacts` tab meaning it sends all artifact to specified destination path(NFS Server). 
+![](./Img/22.archive_path.jpg)
+![](./Img/23.archive_path2.jpg)
+
+Now make a new change on the source code and push to github, Jenkins builds an artifact by downloading the code into its workspace based on the latest commit and via SSH it publishes the artifact into the NFS Server to update the source code. 
+
+This is seen by the change of name on the web application
+![](./Img/24.new_changes.jpg)
+![](./Img/25.new_change_updated.jpg)
